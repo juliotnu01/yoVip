@@ -12,7 +12,7 @@ app.listen((process.env.PORT || 5000), () => console.log('El servidor webhook es
 
 // Ruta de la pagina index
 app.get("/", function (req, res) {
-    res.send("Se ha desplegado de manera exitosa el CMaquera ChatBot :D!!!");
+    res.send("Se ha desplegado de manera exitosa el ChatBot :D!!!");
 });
 
 // Facebook Webhook
@@ -24,6 +24,7 @@ app.get("/webhook", function (req, res) {
         // Mensaje de exito y envio del token requerido
         console.log("webhook verificado!");
         res.status(200).send(req.query["hub.challenge"]);
+        console.log(res);
     } else {
         // Mensaje de fallo
         console.error("La verificacion ha fallado, porque los tokens no coinciden");
@@ -34,7 +35,7 @@ app.get("/webhook", function (req, res) {
 // Todos eventos de mesenger sera apturados por esta ruta
 app.post("/webhook", function (req, res) {
     // Verificar si el vento proviene del pagina asociada
-    if (req.body.object == "page") {
+    if (req.body.object == "suscribe") {
 
     	console.log(req);
         // Si existe multiples entradas entraas
