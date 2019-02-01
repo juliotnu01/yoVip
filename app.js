@@ -12,9 +12,9 @@ app.use(bodyParser.json());
 app.listen((process.env.PORT || 5000), () => console.log('El servidor webhook esta escuhando!'));
 
 // // Ruta de la pagina index
-// app.get("/", function (req, res) {
-//     res.send("Se ha desplegado de manera exitosa el ChatBot :D!!!");
-// });
+app.get("/", function (req, res) {
+    res.send("Se ha desplegado de manera exitosa el ChatBot :D!!!");
+});
 
 // // Facebook Webhook
 
