@@ -1,27 +1,94 @@
 'use strict';
 
 // Importar las dependencias para configurar el servidor
-var express = require("express");
-var request = require("request");
-app = express().use(bodyParser.json());
+const
+  express = require('express'),
+  bodyParser = require('body-parser'),
+  app = express().use(bodyParser.json()); // creates express http server
 
-var app = express();
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+
 // configurar el puerto y el mensaje en caso de exito
-app.listen((process.env.PORT || 5000), () => console.log('El servidor webhook esta escuhando!'));
+app.listen((process.env.PORT || 1337), () => console.log('El servidor webhook esta escuchando!'));
 
-// // Ruta de la pagina index
-app.get("/", function (req, res) {
-    res.send("Se ha desplegado de manera exitosa el ChatBot :D!!!");
+
+
+
+app.post('/webhook', (req, res) => {  
+ 
+  let body = req.body;
+
+  // Checks this is an event from a page subscription
+  if (body.object === 'page') {
+
+    // Iterates over each entry - there may be multiple if batched
+    body.entry.forEach(function(entry) {
+
+      // Gets the message. entry.messaging is an array, but 
+      // will only ever contain one message, so we get index 0
+      let webhook_event = entry.messaging[0];
+      console.log(webhook_event);
+    });
+
+    // Returns a '200 OK' response to all requests
+    res.status(200).send('EVENT_RECEIVED');
+  } else {
+    // Returns a '404 Not Found' if event is not from a page subscription
+    res.sendStatus(404);
+  }
+
 });
 
-// // Facebook Webhook
+
+
+app.get('/webhook', (req, res) => {
+
+  // Your verify token. Should be a random string.
+  let VERIFY_TOKEN = "yo-vip"
+    
+  // Parse the query params
+  let mode = req.query['hub.mode'];
+  let token = req.query['hub.verify_token'];
+  let challenge = req.query['hub.challenge'];
+    
+  // Checks if a token and mode is in the query string of the request
+  if (mode && token) {
+  
+    // Checks the mode and token sent is correct
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      
+      // Responds with the challenge token from the request
+      console.log('WEBHOOK_VERIFIED');
+      res.status(200).send(challenge);
+    
+    } else {
+      // Responds with '403 Forbidden' if verify tokens do not match
+      res.sendStatus(403);      
+    }
+  }
+});
+
+
+
+
+
+
+
+
+// const PAGE_ACCESS_TOKEN = "EAAH4g5yYSH0BAMyZAVwim4ZCrbxkJZCLGO9i4hLuX7iZArj7uiRHV3Koc6mcNZCAnacbFIwk5ZAPwu8SAUkjJKO3kGXAIYQNJWb5zytezZBkySd37MyphNqLfZASItRHjjpN9uRZBgdgCFRxzuc7AkHjxVf6ehlZCYoaQlt5dn3RD4rAZDZD";
+// const VERIFICATION_TOKEN = "yo-vip";
+
+// Ruta de la pagina index
+// app.get("/", function (req, res) {
+//     res.send("Se ha desplegado de manera exitosa el ChatBot :D!!!");
+// });
+
+// Facebook Webhook
 
 // // Usados para la verificacion
 // app.get("/webhook", function (req, res) {
+
 //     // Verificar la coincidendia del token
-//     if (req.query["hub.verify_token"] === process.env.VERIFICATION_TOKEN) {
+//     if (req.query["hub.verify_token"] === "yo-vip") {
 //         // Mensaje de exito y envio del token requerido
 //         console.log("webhook verificado!");
 //         res.status(200).send(req.query["hub.challenge"]);
@@ -38,7 +105,7 @@ app.get("/", function (req, res) {
 //     // Verificar si el vento proviene del pagina asociada
 //     if (req.body.object == "suscribe") {
 
-//     	console.log(req);
+//         console.log(req);
 //         // Si existe multiples entradas entraas
 //         req.body.entry.forEach(function(entry) {
 //             // Iterara todos lo eventos capturados
@@ -84,7 +151,7 @@ app.get("/", function (req, res) {
 //     // Enviar el requisito HTTP a la plataforma de messenger
 //     request({
 //         "uri": "https://graph.facebook.com/v2.6/me/messages",
-//         "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN },
+//         "qs": { "access_token": PAGE_ACCESS_TOKEN },
 //         "method": "POST",
 //         "json": request_body
 //     }, (err, res, body) => {
@@ -95,5 +162,4 @@ app.get("/", function (req, res) {
 //         }
 //     }); 
 // }
-
 
