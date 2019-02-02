@@ -30,6 +30,11 @@ app.post('/webhook', (req, res) => {
        // Get the sender PSID
   let sender_psid = webhook_event.sender.id;
   console.log('Sender PSID: ' + sender_psid);
+  if (webhook_event.message) {
+    handleMessage(sender_psid, webhook_event.message);        
+  } else if (webhook_event.postback) {
+    handlePostback(sender_psid, webhook_event.postback);
+  }
     });
 
     // Returns a '200 OK' response to all requests
@@ -41,6 +46,49 @@ app.post('/webhook', (req, res) => {
 
 });
 
+function handleMessage(sender_psid, received_message) {
+
+  let response;
+
+  // Check if the message contains text
+  if (received_message.text) {    
+
+    // Create the payload for a basic text message
+    response = {
+      "text": `You sent the message: "${received_message.text}". Now send me an image!`
+    }
+  }  
+  
+  // Sends the response message
+  callSendAPI(sender_psid, response);    
+};
+
+function callSendAPI(sender_psid, response) {
+
+  let PAGE_ACCESS_TOKEN = "EAAH4g5yYSH0BAIuQ0I78ZAjzmbkZCFFjYFR62djCN2UXpZBbq2HdSYsInlzG7j84ClyyvQtwZBTFRP205TVSgE2oxdZBMqXpi1ZA8ZCX3pI7FInQLCpLZCObufXimHuF8WO6Xya6rg9Pt65mBHMB13LZAvwZC73dSylW8oZAqS7GxRZBzwZDZD"
+  // Construct the message body
+  let request_body = {
+    "recipient": {
+      "id": sender_psid
+    },
+    "message": response
+  }
+
+
+   request({
+    "uri": "https://graph.facebook.com/v2.6/me/messages",
+    "qs": { "access_token": PAGE_ACCESS_TOKEN },
+    "method": "POST",
+    "json": request_body
+  }, (err, res, body) => {
+    if (!err) {
+      console.log('message sent!')
+    } else {
+      console.error("Unable to send message:" + err);
+    }
+  });
+
+};
 
 
 app.get('/webhook', (req, res) => {
