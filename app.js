@@ -122,7 +122,8 @@ function handlePostback(sender_psid, received_postback) {
 
   function callSendAPI(sender_psid, response) {
 
-  let PAGE_ACCESS_TOKEN = "EAAH4g5yYSH0BAIuQ0I78ZAjzmbkZCFFjYFR62djCN2UXpZBbq2HdSYsInlzG7j84ClyyvQtwZBTFRP205TVSgE2oxdZBMqXpi1ZA8ZCX3pI7FInQLCpLZCObufXimHuF8WO6Xya6rg9Pt65mBHMB13LZAvwZC73dSylW8oZAqS7GxRZBzwZDZD"
+  // let PAGE_ACCESS_TOKEN = "EAAH4g5yYSH0BAIuQ0I78ZAjzmbkZCFFjYFR62djCN2UXpZBbq2HdSYsInlzG7j84ClyyvQtwZBTFRP205TVSgE2oxdZBMqXpi1ZA8ZCX3pI7FInQLCpLZCObufXimHuF8WO6Xya6rg9Pt65mBHMB13LZAvwZC73dSylW8oZAqS7GxRZBzwZDZD"
+  let PAGE_ACCESS_TOKEN = process.env.FACEBOOK_TOKEN
   // Construct the message body
   let request_body = {
 
@@ -149,7 +150,8 @@ function handlePostback(sender_psid, received_postback) {
 app.get('/webhook', (req, res) => {
 
   // Your verify token. Should be a random string.
-  let VERIFY_TOKEN = "yo-vip"
+  // let VERIFY_TOKEN = "yo-vip"
+    let VERIFY_TOKEN = process.env.FACEBOOK_VERIFICATION
 
   // Parse the query params
   let mode = req.query['hub.mode'];
