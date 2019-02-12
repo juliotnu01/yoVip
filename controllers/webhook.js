@@ -165,7 +165,7 @@ function handlePostback(sender_psid, received_postback) {
 module.exports = {
   getWebhook,
   postWebook,
-  callSendAPI,
-  handlePostback,
-  handleMessage
+  // callSendAPI,
+  // handlePostback,
+  // handleMessage
 }
