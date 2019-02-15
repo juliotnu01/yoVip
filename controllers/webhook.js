@@ -1,6 +1,9 @@
 'use strict'
 const config = require('../config'),
-      FsMessage = require('../models/facebookMessage')  
+      express = require('express'),
+      Message = require('../models/message'),
+      request = require('request'),
+      app = express();
 
 function getWebhook(req, res) {
   	
@@ -25,10 +28,8 @@ function getWebhook(req, res) {
   }
 }
 
+function postedMessage(req, res) {
 
-function postWebook(req, res) {
-
- 
   let body = req.body;
 
   // Checks this is an event from a page subscription
@@ -40,20 +41,21 @@ function postWebook(req, res) {
     // Gets the message. entry.messaging is an array, but 
     // will only ever contain one message, so we get index 0
     let webhook_event = entry.messaging[0];
-    console.log(webhook_event);
+    // console.log(webhook_event);
     // Get the sender PSID
-    let sender_psid = webhook_event.sender.id;
+    // let sender_psid = webhook_event.sender.id;
 
-    console.log('Sender PSID: ' + sender_psid);
+    // console.log('Sender PSID: ' + sender_psid);
 
     if (webhook_event.message) {
 
-      handleMessage(sender_psid, webhook_event.message); 
+      handleMessage(webhook_event.message); 
 
-    } else if (webhook_event.postback) {
+    } 
+    // else if (webhook_event.postback) {
 
-      handlePostback(sender_psid, webhook_event.postback);
-    }
+    //   handlePostback(sender_psid, webhook_event.postback);
+    // }
     });
 
     // Returns a '200 OK' response to all requests
@@ -68,104 +70,21 @@ function postWebook(req, res) {
 
 }
 
+function handleMessage(received_message) {
+  
+ let Message = request.post(`http://localhost:${config.port}/api/message`, 
+              {json: {mid: received_message.mid, seq: received_message.seq, text: received_message.text}})
 
-function handleMessage(sender_psid, received_message) {
+if (Message) {
+  console.log(`Message Save: ${Message.body}`)
 
-  let response;
+  return Message
+}
 
-  // Check if the message contains text
-  if (received_message.text) {    
-
-  // Create the payload for a basic text message
-    response = {
-    "text": `You sent the message: "${received_message.text}". Now send me an image!`
-    }
-  }  else if (received_message.attachments) {
-
-    // Gets the URL of the message attachment
-    let attachment_url = received_message.attachments[0].payload.url;
-
-    response = {
-      "attachment": {
-                      "type": "template",
-                      "payload": {
-                                  "template_type": "generic",
-                                  "elements": [{
-                                                "title": "Is this the right picture?",
-                                                "subtitle": "Tap a button to answer.",
-                                                "image_url": attachment_url,
-                                  "buttons":  [{
-                                                "type": "postback",
-                                                "title": "Yes!",
-                                                "payload": "yes",
-                                              },
-                                              {
-                                                "type": "postback",
-                                                "title": "No!",
-                                                "payload": "no",
-                                              }],
-                                  }]      
-                      }
-      }
-    }
-  } 
-
-  // Sends the response message
-  callSendAPI(sender_psid, response);    
-};
-function handlePostback(sender_psid, received_postback) {
-
-
-    let response;
-
-    // Get the payload for the postback
-    let payload = received_postback.payload;
-
-    // Set the response based on the postback payload
-    if (payload === 'yes') {
-
-      response = { "text": "Thanks!" }
-    } else if (payload === 'no') {
-      response = { "text": "Oops, try sending another image." }
-    }
-    // Send the message to acknowledge the postback
-    callSendAPI(sender_psid, response);
-
-};
-
-
-  function callSendAPI(sender_psid, response) {
-
-  let PAGE_ACCESS_TOKEN = "EAAKH8inBw3UBALHHE2LeymM0IBOVpwPSCWDiIbl8XfDvU2WATC1ZCLke5RnPKdbPugXc30udx8dZALKoLR4H9YQ3afZCqW94UtbkW5sEGK6nbZBhcSjKIgL1uDB8qsC088SqELful4ivWt9DitRV3mmCZBaB6xHTU5lqrVJ4uWwZDZD"
-  // let PAGE_ACCESS_TOKEN = process.env.FACEBOOK_TOKEN
-  // Construct the message body
-  let request_body = {
-
-    "recipient": {
-                  "id": sender_psid},
-                  "message": response}
-
-
-    request({
-              "uri": "https://graph.facebook.com/v2.6/me/messages",
-              "qs": { "access_token": PAGE_ACCESS_TOKEN },
-              "method": "POST",
-              "json": request_body
-    }, (err, res, body) => {
-        if (!err) {
-          console.log('message sent!')
-        } else {
-          console.error("Unable to send message:" + err);
-        }
-      });
-};
-
-
+}
 
 module.exports = {
   getWebhook,
-  postWebook,
-  // callSendAPI,
-  // handlePostback,
-  // handleMessage
+  postedMessage,
+  handleMessage
 }

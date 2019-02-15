@@ -6,12 +6,11 @@ const
 	api = require('./routes'),
 	bodyParser = require('body-parser');
 
-// middleware
+// // middleware
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
-
-// routes
 app.use('/api', api)
 
+// routes
 
 module.exports = app
